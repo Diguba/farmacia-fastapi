@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Farmacia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <script src="/static/script.js" defer></script>
+</head>
+<body>
+  <h1>Gestión de Medicamentos</h1>
+
+  <!-- Búsqueda -->
+  <input type="text" id="buscador" placeholder="Buscar medicamento por nombre o sustancia">
+
+  <!-- Formulario -->
+  <form method="post" action="/agregar">
+    <input name="nombre" placeholder="Nombre del medicamento" required>
+    <video id="scanner" width="300" style="display:none;"></video><br>
+    <button type="button" onclick="startScanner()">📷 Escanear Código</button>
+    <input name="codigo" id="codigoInput" placeholder="Código de barras" required>
+
+    <select name="tipo" required>
+      <option value="1">Antibiótico</option>
+      <option value="2">Genérico</option>
+      <option value="3">Patente</option>
+    </select>
+
+    <select name="presentacion" required>
+      <option value="1">Tableta</option>
+      <option value="2">Cápsula</option>
+      <option value="3">Suspensión</option>
+      <option value="4">Inyectable</option>
+    </select>
+
+    <input name="precio" type="number" step="0.01" placeholder="Precio ($)" required>
+
+    <input name="sustancia1" placeholder="Sustancia 1" required>
+    <input name="concentracion1" placeholder="Concentración 1 (ej: 500mg, 250mg/5ml)" required>
+    <input name="sustancia2" placeholder="Sustancia 2 (opcional)">
+    <input name="concentracion2" placeholder="Concentración 2 (opcional)">
+
+    <button type="submit">Guardar</button>
+  </form>
+
+  <!-- Lista de medicamentos -->
+  <ul id="lista-medicamentos">
+    {% set current_tipo = "" %}
+    {% for m in medicamentos %}
+      {% if m[4] != current_tipo %}
+        <h2>{{ m[4] }}</h2>
+        {% set current_tipo = m[4] %}
+        {% set current_letra = "" %}
+      {% endif %}
+      {% if m[1][0]|upper != current_letra %}
+        <h3>{{ m[1][0]|upper }}</h3>
+        {% set current_letra = m[1][0]|upper %}
+      {% endif %}
+      <li>
+        <strong>{{ m[1] }}</strong> ({{ m[4] }} / {{ m[5] }})<br>
+        Código: {{ m[2] }} - Precio: ${{ m[3] }}<br>
+        <button type="button" onclick="editar({{ m[0] }})">✏️ Editar</button>
+        <a href="/borrar/{{ m[0] }}" onclick="return confirm('¿Estás seguro?')">🗑️ Borrar</a>
+      </li>
+    {% endfor %}
+  </ul>
+  <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/static/service-worker.js");
+  }
+</script>
+
+</body>
+</html>
